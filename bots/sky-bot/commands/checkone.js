@@ -1,6 +1,6 @@
 const SheetService = require('../../../core/sheet')
 const { PermissionsBitField } = require('discord.js')
-const logError = require('../../../utils/errorLogger')
+const logError = require('../utils/errorLogger')
 
 module.exports = {
   name: 'checkone',

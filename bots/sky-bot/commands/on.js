@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid')
 const dayjs = require('dayjs')
 const SheetService = require('../../../core/sheet')
-const logError = require('../../../utils/errorLogger')
+const logError = require('../utils/errorLogger')
 
 module.exports = {
   name: 'on',
