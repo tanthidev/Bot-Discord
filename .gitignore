@@ -1,0 +1,8 @@
+# Node modules
+node_modules/
+
+.env
+
+core/credentials.json
+
+bots/sky-bot/config.js
