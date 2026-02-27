@@ -1,6 +1,6 @@
 require('dotenv').config()
-
-const startCron = require('../../core/cron')
+const workingCache = require('./core/cache/workingCache')
+const startCron = require('./core/cron')
 
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js')
 const path = require('path')
@@ -40,4 +40,15 @@ console.log(`🤖 Starting bot: ${config.name}`)
 // sau client.login()
 client.once('ready', () => {
   startCron(client)
+})
+
+client.once('ready', async () => {
+  await workingCache.preload(client)
+
+  // fallback reload mỗi 5 phút
+  setInterval(() => {
+    workingCache.preload(client)
+  }, 20 * 60 * 1000)
+
+  console.log(`Sky-bot online as ${client.user.tag}`)
 })

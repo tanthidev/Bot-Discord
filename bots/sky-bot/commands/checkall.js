@@ -1,4 +1,4 @@
-const SheetService = require('../../../core/sheet')
+const SheetService = require('../core/sheet')
 const { EmbedBuilder, PermissionsBitField } = require('discord.js')
 const logError = require('../utils/errorLogger')
 

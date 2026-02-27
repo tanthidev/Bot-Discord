@@ -1,6 +1,8 @@
 const dayjs = require('dayjs')
-const SheetService = require('../../../core/sheet')
+const SheetService = require('../core/sheet')
 const logError = require('../utils/errorLogger')
+const workingCache = require('../core/cache/workingCache')
+
 
 module.exports = {
   name: 'off',
@@ -18,15 +20,16 @@ module.exports = {
       const now = dayjs()
 
       // 1. Tìm ca đang trực trong Working Now
-      const workingShift = await workingSheet.findOne(row =>
-        row._rawData[1] === userId
-      )
+      const workingShift = workingCache.get(userId)
 
+      
       if (!workingShift) {
         return message.reply('Bạn chưa `!on` ca làm hoặc ca đã kết thúc.')
       }
 
-      const onTime = dayjs(workingShift._rawData[3])
+      console.log(workingShift.OnTime);
+      
+      const onTime = dayjs(workingShift.OnTime)
       const diffMinutes = now.diff(onTime, 'minute')
 
       const hours = Math.floor(diffMinutes / 60)
@@ -34,10 +37,10 @@ module.exports = {
 
       // 2. Ghi vào Attendance Mechanic
       await attendanceSheet.preappend({
-        ID: workingShift._rawData[0],
+        ID: workingShift.ID,
         DiscordID: userId,
-        Name: workingShift._rawData[2],
-        OnTime: workingShift._rawData[3],
+        Name: workingShift.Name,
+        OnTime: onTime,
         OffTime: now.format('YYYY-MM-DD HH:mm:ss'),
         Date: now.format('YYYY-MM-DD'),
         Minutes: diffMinutes,
@@ -45,8 +48,10 @@ module.exports = {
       })
 
       // 3. Xóa khỏi Working Now
-      await workingSheet.deleteById(workingShift._rawData[0])
+      await workingSheet.deleteById(workingShift.ID)
 
+      // 4. Xóa cache
+      workingCache.delete(userId)
       return message.reply({
         embeds: [{
           color: 0x003d7a,

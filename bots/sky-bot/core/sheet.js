@@ -1,6 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet')
 const { JWT } = require('google-auth-library')
-const creds = require('./credentials.json')
+const creds = require('../../../core/credentials.json')
 
 class SheetService {
   constructor(sheetId, sheetName) {
@@ -44,9 +44,10 @@ class SheetService {
     Object.entries(data).forEach(([k, v]) => {
         row.set(k, v)
     })
-
+    
     await row.save()
   }
+
 
     async append(data) {
       await this.init()
