@@ -54,7 +54,7 @@ module.exports = {
       // ===== HEADER =====
 
       const header = new EmbedBuilder()
-        .setColor('#00b0f4')
+        .setColor(15738)
         .setTitle(`LỊCH CA TRỰC — ${data.displayName}`)
         .setDescription(`**Kỳ:** ${fromDate}${toDate ? ` → ${toDate}` : ''}`)
         .addFields(

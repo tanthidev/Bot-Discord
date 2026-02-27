@@ -25,6 +25,10 @@ class WorkingCache {
     console.log(`[CACHE] Loaded ${this.cache.size} working shifts`)
   }
 
+  getAll() {
+    return Array.from(this.cache.values())
+  }
+
   has(userId) {
     return this.cache.has(userId)
   }

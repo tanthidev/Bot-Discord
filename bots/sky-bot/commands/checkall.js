@@ -49,7 +49,7 @@ module.exports = {
       })
 
       const header = new EmbedBuilder()
-        .setColor('#00b0f4')
+        .setColor(15738)
         .setTitle('BÁO CÁO CA TRỰC — TOÀN BỘ NHÂN VIÊN')
         .setDescription(`**Kỳ:** ${from}${to ? ` → ${to}` : ''}`)
         .addFields(
