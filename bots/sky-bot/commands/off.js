@@ -40,7 +40,7 @@ module.exports = {
         ID: workingShift.ID,
         DiscordID: userId,
         Name: workingShift.Name,
-        OnTime: onTime,
+        OnTime: onTime.format('YYYY-MM-DD HH:mm:ss'),
         OffTime: now.format('YYYY-MM-DD HH:mm:ss'),
         Date: now.format('YYYY-MM-DD'),
         Minutes: diffMinutes,
