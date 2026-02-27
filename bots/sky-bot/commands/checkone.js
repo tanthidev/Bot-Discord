@@ -1,6 +1,8 @@
 const SheetService = require('../core/sheet')
-const { PermissionsBitField } = require('discord.js')
+const { PermissionsBitField, EmbedBuilder } = require('discord.js')
 const logError = require('../utils/errorLogger')
+const splitMessage = require('../utils/splitMessage')
+const sendEmbedsSafe = require('../utils/sendEmbeds')
 
 module.exports = {
   name: 'checkone',
@@ -25,14 +27,11 @@ module.exports = {
       let fromDate, toDate = null
       let keywordParts = []
 
-      // Có 2 ngày → khoảng ngày
       if (args.length >= 3 && args[args.length - 2].includes('/')) {
         fromDate = args[args.length - 2]
         toDate = args[args.length - 1]
         keywordParts = args.slice(0, args.length - 2)
-      }
-      // Có 1 ngày
-      else {
+      } else {
         fromDate = args[args.length - 1]
         keywordParts = args.slice(0, args.length - 1)
       }
@@ -50,12 +49,30 @@ module.exports = {
         return message.reply('Không tìm thấy dữ liệu phù hợp.')
       }
 
-      let text = `**Lịch ca trực của ${data.displayName}**\n`
-      text += `Kỳ: ${fromDate}${toDate ? ' → ' + toDate : ''}\n\n`
+      const embeds = []
 
-      text += '```\n'
-      text += 'STT  | Ngày       | Vào   | Ra    | Tổng (phút) | Trạng thái\n'
-      text += '─'.repeat(60) + '\n'
+      // ===== HEADER =====
+
+      const header = new EmbedBuilder()
+        .setColor('#00b0f4')
+        .setTitle(`LỊCH CA TRỰC — ${data.displayName}`)
+        .setDescription(`**Kỳ:** ${fromDate}${toDate ? ` → ${toDate}` : ''}`)
+        .addFields(
+          { name: 'Ca hoàn tất', value: String(data.totalShift), inline: true },
+          { name: 'Ca huỷ', value: String(data.totalCancel), inline: true },
+          { name: 'Tổng thời gian', value: `${data.totalMinutes} phút (~${(data.totalMinutes / 60).toFixed(1)}h)`, inline: true }
+        )
+        .setFooter({ text: 'Sky-bot Attendance System' })
+        .setTimestamp()
+
+      embeds.push(header)
+
+      // ===== TABLE =====
+
+      let table = ''
+      table += '```\n'
+      table += 'STT | Ngày       | Vào   | Ra    | Phút  | Trạng thái\n'
+      table += '----------------------------------------------------\n'
 
       data.logs.forEach((l, i) => {
         const date = l.date || '--/--/----'
@@ -63,23 +80,29 @@ module.exports = {
         const off = l.offTime?.slice(11, 16) || '--:--'
         const status = (l.status || '').padEnd(10)
 
-        text += `${String(i + 1).padEnd(3)}  | ${date} | ${on} | ${off} |${String(l.minutes).padEnd(13)}| ${status}\n`
+        table += `${String(i + 1).padEnd(3)} | ${date} | ${on} | ${off} | ${String(l.minutes).padEnd(5)} | ${status}\n`
       })
 
-      text += '```\n'
-      text += `**Thống kê:**\n`
-      text += `• Ca hoàn tất: ${data.totalShift}\n`
-      text += `• Ca hủy: ${data.totalCancel}\n`
-      text += `• Tổng thời gian: ${data.totalMinutes} phút (~${(data.totalMinutes / 60).toFixed(1)}h)`
+      table += '```'
 
-      return message.reply(text)
+      // ===== SPLIT =====
+
+      const chunks = splitMessage(table, 3800)
+
+      chunks.forEach((chunk, index) => {
+        const e = new EmbedBuilder()
+          .setColor('#1f2937')
+          .setDescription(chunk)
+          .setFooter({ text: `Trang ${index + 1}/${chunks.length}` })
+
+        embeds.push(e)
+      })
+
+      await sendEmbedsSafe(message, embeds, true)
 
     } catch (err) {
       console.error('[CHECKONE ERROR]', err)
-
-      // Gửi log về kênh riêng
       logError(client, err, 'command: checkone')
-
       return message.reply('Đã xảy ra lỗi. Vui lòng thử lại hoặc liên hệ dev.')
     }
   }

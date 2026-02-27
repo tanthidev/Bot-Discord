@@ -14,7 +14,7 @@ module.exports = {
       return message.reply(
         `📌 **Hướng dẫn lệnh !${cmd.name}**\n\n` +
         `Mô tả: ${cmd.description || 'Không có'}\n` +
-        `Cú pháp: \`!${cmd.usage || 'Chưa có'}\`\n` +
+        `Cú pháp: \`${cmd.usage || 'Chưa có'}\`\n` +
         `Ví dụ:\n${cmd.example ? cmd.example.map(e => `- ${e}`).join('\n') : 'Không có'}`
       )
     }

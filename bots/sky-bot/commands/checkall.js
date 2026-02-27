@@ -1,6 +1,8 @@
 const SheetService = require('../core/sheet')
 const { EmbedBuilder, PermissionsBitField } = require('discord.js')
 const logError = require('../utils/errorLogger')
+const splitMessage = require('../utils/splitMessage')
+const sendEmbedsSafe = require('../utils/sendEmbeds')
 
 module.exports = {
   name: 'checkall',
@@ -19,7 +21,7 @@ module.exports = {
       }
 
       if (args.length < 1) {
-        return message.reply('Cú pháp: `!checkall dd/mm/yyyy dd/mm/yyyy hoặc !checkall dd/mm/yyyy`')
+        return message.reply('Cú pháp: `!checkall <dd/mm/yyyy> [dd/mm/yyyy]`')
       }
 
       const from = args[0]
@@ -28,46 +30,73 @@ module.exports = {
       const sheet = new SheetService(client.config.sheetId, "Attendance Mechanic")
       const data = await sheet.checkAll(from, to)
 
-      if (Object.keys(data).length === 0) {
+      if (!Object.keys(data).length) {
         return message.reply('Không có dữ liệu phù hợp.')
       }
 
       const embeds = []
-      let currentEmbed = new EmbedBuilder()
-        .setTitle('BÁO CÁO CA TRỰC')
-        .setDescription(`**Thời gian:** ${from}${to ? ` → ${to}` : ''}`)
-        .setColor('#0099ff')
 
-      let fieldCount = 0
-      for (const id in data) {
-        const u = data[id]
+      // ===== SUMMARY =====
+
+      let totalShift = 0
+      let totalCancel = 0
+      let totalMinutes = 0
+
+      Object.values(data).forEach(u => {
+        totalShift += u.totalShift
+        totalCancel += u.totalCancel
+        totalMinutes += u.totalMinutes
+      })
+
+      const header = new EmbedBuilder()
+        .setColor('#00b0f4')
+        .setTitle('BÁO CÁO CA TRỰC — TOÀN BỘ NHÂN VIÊN')
+        .setDescription(`**Kỳ:** ${from}${to ? ` → ${to}` : ''}`)
+        .addFields(
+          { name: 'Tổng nhân viên', value: String(Object.keys(data).length), inline: true },
+          { name: 'Tổng ca hoàn tất', value: String(totalShift), inline: true },
+          { name: 'Tổng ca huỷ', value: String(totalCancel), inline: true },
+          { name: 'Tổng thời gian', value: `${totalMinutes} phút (~${(totalMinutes / 60).toFixed(1)}h)`, inline: true }
+        )
+        .setFooter({ text: 'Sky-bot Attendance System' })
+        .setTimestamp()
+
+      embeds.push(header)
+
+      // ===== TABLE =====
+
+      let table = ''
+      table += '```\n'
+      table += 'Tên nhân viên        | Ca | Huỷ | Tổng giờ\n'
+      table += '---------------------------------------------\n'
+
+      Object.values(data).forEach(u => {
+        const name = u.name.padEnd(20).slice(0, 20)
         const hours = (u.totalMinutes / 60).toFixed(2)
 
-        if (fieldCount === 25) {
-          embeds.push(currentEmbed)
-          currentEmbed = new EmbedBuilder().setColor('#0099ff')
-          fieldCount = 0
-        }
+        table += `${name} | ${String(u.totalShift).padEnd(2)} | ${String(u.totalCancel).padEnd(3)} | ${hours.padStart(7)}h\n`
+      })
 
-        currentEmbed.addFields({
-          name: `${u.name}`,
-          value: `\`\`\`\nCa hoàn tất: ${u.totalShift}\nCa bị huỷ: ${u.totalCancel}\nTổng thời gian: ${hours} giờ\n\`\`\``,
-          inline: false
-        })
-        fieldCount++
-      }
+      table += '```'
 
-      currentEmbed.setFooter({ text: `Tổng cộng: ${Object.keys(data).length} nhân viên` })
-      embeds.push(currentEmbed)
+      // ===== SPLIT =====
 
-      return message.reply({ embeds })
+      const chunks = splitMessage(table, 3800)
+
+      chunks.forEach((chunk, index) => {
+        const e = new EmbedBuilder()
+          .setColor('#1f2937')
+          .setDescription(chunk)
+          .setFooter({ text: `Trang ${index + 1}/${chunks.length}` })
+
+        embeds.push(e)
+      })
+
+      await sendEmbedsSafe(message, embeds, true)
 
     } catch (err) {
       console.error('[CHECKALL ERROR]', err)
-
-      // Gửi log về kênh riêng
       logError(client, err, 'command: checkall')
-
       return message.reply('Đã xảy ra lỗi. Vui lòng thử lại hoặc liên hệ dev.')
     }
   }
