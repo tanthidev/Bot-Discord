@@ -2,6 +2,8 @@ const { v4: uuidv4 } = require('uuid')
 const dayjs = require('dayjs')
 const SheetService = require('../../../core/sheet')
 const logError = require('../utils/errorLogger')
+const nowMs = () => Number(process.hrtime.bigint() / 1000000n)
+
 
 module.exports = {
   name: 'on',
@@ -78,3 +80,9 @@ async execute(message, args, client) {
   }
 }
 }
+
+// Init SheetService: 0 ms
+// Find workingShift: 1157 ms
+// Append row: 413 ms
+// Reply Discord: 940 ms
+// TOTAL: 2512 ms
