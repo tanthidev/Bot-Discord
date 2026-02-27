@@ -9,65 +9,72 @@ module.exports = {
   usage: '!on',
   example: ['!on'],
 
-  async execute(message, args, client) {
-    try {
+async execute(message, args, client) {
+  const t0 = nowMs()
 
-      const sheet = new SheetService(client.config.sheetId, "Working Now")
+  try {
+    const t1 = nowMs()
+    const sheet = new SheetService(client.config.sheetId, "Working Now")
+    console.log('Init SheetService:', nowMs() - t1, 'ms')
 
-      const userId = message.author.id
-      const username = message.member?.displayName || message.author.username
+    const userId = message.author.id
+    const username = message.member?.displayName || message.author.username
 
-      // 1. Check đang có ca working không
-      const workingShift = await sheet.find(row =>
-        row.DiscordID === userId && row.Status === 'Working'
-      )
+    const t2 = nowMs()
+    const workingShift = await sheet.find(row =>
+      row.DiscordID === userId && row.Status === 'Working'
+    )
+    console.log('Find workingShift:', nowMs() - t2, 'ms')
 
-      if (workingShift) {
-        return message.reply('Bạn đang có ca chưa kết thúc. Vui lòng `!off` trước.')
-      }
-
-      const now = dayjs()
-
-      const row = {
-        ID: uuidv4(),
-        DiscordID: userId,
-        Name: username,
-        OnTime: now.format('YYYY-MM-DD HH:mm:ss'),
-        OffTime: '',
-        Minutes: '',
-        Date: now.format('YYYY-MM-DD'),
-        Status: 'Working',
-        Note: ''
-      }
-
-      await sheet.append(row)
-
-      return message.reply({
-        embeds: [{
-          color: 0x003d7a,
-          title: 'BẮT ĐẦU CA LÀM VIỆC',
-          description: `<@${userId}> đã **bắt đầu ca làm việc**`,
-          fields: [
-            {
-              name: 'Thời gian bắt đầu',
-              value: now.format('HH:mm:ss'),
-              inline: true
-            }
-          ],
-          footer: {
-            text: 'Nhớ kết thúc ca bằng lệnh !off khi hoàn thành công việc'
-          },
-          timestamp: new Date()
-        }]
-      })
-
-    } catch (err) {
-      console.error('[ON COMMAND ERROR]', err)
-
-      // Gửi log lỗi về kênh riêng
-      logError(client, err, 'command: on')
-
-      return message.reply('Đã xảy ra lỗi khi bắt đầu ca làm. Vui lòng thử lại hoặc liên hệ dev.')
+    if (workingShift) {
+      return message.reply('Bạn đang có ca chưa kết thúc. Vui lòng `!off` trước.')
     }
+
+    const now = dayjs()
+
+    const row = {
+      ID: uuidv4(),
+      DiscordID: userId,
+      Name: username,
+      OnTime: now.format('YYYY-MM-DD HH:mm:ss'),
+      OffTime: '',
+      Minutes: '',
+      Date: now.format('YYYY-MM-DD'),
+      Status: 'Working',
+      Note: ''
+    }
+
+    const t3 = nowMs()
+    await sheet.append(row)
+    console.log('Append row:', nowMs() - t3, 'ms')
+
+    const t4 = nowMs()
+    await message.reply({
+      embeds: [{
+        color: 0x003d7a,
+        title: 'BẮT ĐẦU CA LÀM VIỆC',
+        description: `<@${userId}> đã **bắt đầu ca làm việc**`,
+        fields: [
+          {
+            name: 'Thời gian bắt đầu',
+            value: now.format('HH:mm:ss'),
+            inline: true
+          }
+        ],
+        footer: {
+          text: 'Nhớ kết thúc ca bằng lệnh !off khi hoàn thành công việc'
+        },
+        timestamp: new Date()
+      }]
+    })
+    console.log('Reply Discord:', nowMs() - t4, 'ms')
+
+    console.log('TOTAL:', nowMs() - t0, 'ms')
+
+  } catch (err) {
+    console.error('[ON COMMAND ERROR]', err)
+    logError(client, err, 'command: on')
+    return message.reply('Đã xảy ra lỗi khi bắt đầu ca làm.')
   }
+}
 }
