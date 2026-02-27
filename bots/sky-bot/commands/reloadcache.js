@@ -3,7 +3,7 @@ const workingCache = require('../core/cache/workingCache')
 
 module.exports = {
   name: 'reloadcache',
-  description: 'Reload cache Working Now từ Google Sheet',
+  description: 'Reload cache Working Now từ Google Sheet. Sử dụng khi có sự thay đổi dữ liệu thủ công ở sheet Working Now.',
   usage: '!reloadcache',
   async execute(message) {
 

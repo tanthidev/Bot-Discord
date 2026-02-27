@@ -6,7 +6,7 @@ const sendEmbedsSafe = require('../utils/sendEmbeds')
 
 module.exports = {
   name: 'checkone',
-  description: 'Xem chi tiết ca trực của 1 nhân viên',
+  description: '(Admin) Xem chi tiết ca trực của 1 nhân viên',
   usage: '!checkone <name|discordId> <dd/mm/yyyy> [dd/mm/yyyy]',
   example: [
     '!checkone Em Thi Dev Lỏ [876] 26/02/2026',

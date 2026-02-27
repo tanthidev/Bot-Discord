@@ -6,7 +6,7 @@ const sendEmbedsSafe = require('../utils/sendEmbeds')
 
 module.exports = {
   name: 'checkall',
-  description: 'Thống kê toàn bộ ca trực của nhân viên theo ngày hoặc khoảng ngày',
+  description: '(Admin)Thống kê toàn bộ ca trực của nhân viên theo ngày hoặc khoảng ngày',
   usage: '!checkall <dd/mm/yyyy> [dd/mm/yyyy]',
   example: [
     '!checkall 26/02/2026',
