@@ -51,7 +51,7 @@ module.exports = {
       const header = new EmbedBuilder()
         .setColor(15738)
         .setTitle('BÁO CÁO CA TRỰC — TOÀN BỘ NHÂN VIÊN')
-        .setDescription(`**Kỳ:** ${from}${to ? ` → ${to}` : ''}`)
+        .setDescription(`**Ngày:** ${from}${to ? ` → ${to}` : ''}`)
         .addFields(
           { name: 'Tổng nhân viên', value: String(Object.keys(data).length), inline: true },
           { name: 'Tổng ca hoàn tất', value: String(totalShift), inline: true },

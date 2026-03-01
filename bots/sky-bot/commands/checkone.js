@@ -56,7 +56,7 @@ module.exports = {
       const header = new EmbedBuilder()
         .setColor(15738)
         .setTitle(`LỊCH CA TRỰC — ${data.displayName}`)
-        .setDescription(`**Kỳ:** ${fromDate}${toDate ? ` → ${toDate}` : ''}`)
+        .setDescription(`**Ngày:** ${fromDate}${toDate ? ` → ${toDate}` : ''}`)
         .addFields(
           { name: 'Ca hoàn tất', value: String(data.totalShift), inline: true },
           { name: 'Ca huỷ', value: String(data.totalCancel), inline: true },

@@ -149,8 +149,10 @@ class SheetService {
         !name.toLowerCase().includes(keyword.toLowerCase())
       ) continue
 
-      const rowDate = parseDate(dateStr)
+      const rowDate = parseDate(new Date(dateStr).toLocaleDateString('en-GB'))
       if (rowDate < from || rowDate > to) continue
+
+      
 
       displayName = name
 
